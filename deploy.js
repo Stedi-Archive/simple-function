@@ -2,7 +2,8 @@ import {
   FunctionsClient,
   CreateFunctionCommand,
   UpdateFunctionCommand,
-  waitUntilFunctionCreateComplete, waitUntilFunctionUpdateComplete,
+  waitUntilFunctionCreateComplete,
+  waitUntilFunctionUpdateComplete,
 } from "@stedi/sdk-client-functions";
 import { readFile } from "fs/promises";
 import {
@@ -50,7 +51,9 @@ async function deploy() {
       functionName: functionName,
       packageBucket: deploymentBucket,
       packageKey: deploymentFileName,
-      logRetention: 1, // TODO: this is optional in the model but appears required in SC product - update SDK
+      logRetention: 1,          // TODO: should be optional but getting error if not specified
+      environmentVariables: {}, // TODO: should be optional but getting error if not specified
+      timeout: 3,               // TODO: should be optional but getting error if not specified
     });
     const createFunctionResult = await functionsClient.send(createFunctionCommand);
     console.log("Create function result: ", createFunctionResult);
@@ -65,8 +68,7 @@ async function deploy() {
         functionName: functionName,
       },
     );
-  }
-  catch (exception) {
+  } catch (exception) {
     console.log("Function already exists, updating instead.");
 
     // TODO: Update once we throw a specific error for function already existing.
@@ -76,6 +78,9 @@ async function deploy() {
         functionName: functionName,
         packageBucket: deploymentBucket,
         packageKey: deploymentFileName,
+        logRetention: 1,          // TODO: should be optional but getting error if not specified
+        environmentVariables: {}, // TODO: should be optional but getting error if not specified
+        timeout: 3,               // TODO: should be optional but getting error if not specified
       });
       const updateFunctionResult = await functionsClient.send(updateFunctionCommand);
       console.log("Update function result: ", updateFunctionResult);
