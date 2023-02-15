@@ -43,28 +43,6 @@ The other files are helper scripts. We’ll cover each when we need them, but if
 
 Before you deploy the function to your Stedi account, you may want to test it on your local machine. In order to do this, you need to call `handler()`, but you shouldn’t do this in `index.js`, because once deployed, Stedi Functions will call `handler()` for you. Instead, there’s a [test file](test.js) which calls `handler()`.
 
-### Preparation
-
-`test.js` uses [ECMAScript Modules](https://webpack.js.org/guides/ecma-script-modules/), so you need to let Node.js know about that before you can run the code.
-
-1. Initialize npm.
-
-   ```console
-   npm init -y
-   ```
-
-   The option `-y` fills `package.json` with default values. If you leave it out, npm will asks you for a couple of values before creating `package.json`, but you can also edit those after `package.json` has been created.
-
-2. Open [package.json](package.json).
-
-3. Add the following line:
-
-   ```javascript
-   "type": "module",
-   ```
-
-   This tells Node.js to use ECMAScript Modules.
-
 ### Running the test
 
 You can now run the test script, which will call `handler()`.
@@ -111,10 +89,8 @@ The [deployment script](deploy.js) uses the Stedi Functions SDK to deploy the co
 Since the deployment script uses the Stedi Functions SDK, you’ll have to install it.
 
 ```javascript
-npm install @stedi/sdk-client-functions --save-dev
+npm install @stedi/sdk-client-functions
 ```
-
-The option `--save-dev` lets npm know that the function itself doesn’t use the SDK; we only need it for deployment.
 
 ### API key
 
