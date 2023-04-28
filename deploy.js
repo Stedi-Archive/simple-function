@@ -66,7 +66,6 @@ async function deploy() {
       },
     );
   } catch (exception) {
-    // TODO: Update once we throw a specific error for function already existing.
     if (exception.message.includes("already exists")) {
       console.log("Function already exists, updating instead.");
 
