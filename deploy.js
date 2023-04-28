@@ -13,8 +13,8 @@ import {
 import JSZip from "jszip";
 
 async function deploy() {
-  const apiKey = process.env.STEDI_API_KEY;                       // Read API key from the environment variable we set.
-  const deploymentBucket = process.env.STEDI_DEPLOYMENT_BUCKET;   // Read bucket name from the environment.
+  const apiKey = process.env["STEDI_API_KEY"];                       // Read API key from the environment variable we set.
+  const deploymentBucket = process.env["STEDI_DEPLOYMENT_BUCKET"];   // Read bucket name from the environment.
 
   // The buckets client allows us to upload our function to Stedi.
   const bucketsClient = new BucketsClient({
@@ -51,9 +51,6 @@ async function deploy() {
       functionName: functionName,
       packageBucket: deploymentBucket,
       packageKey: deploymentFileName,
-      logRetention: 1,          // TODO: should be optional but getting error if not specified
-      environmentVariables: {}, // TODO: should be optional but getting error if not specified
-      timeout: 3,               // TODO: should be optional but getting error if not specified
     });
     const createFunctionResult = await functionsClient.send(createFunctionCommand);
     console.log("Create function result: ", createFunctionResult);
@@ -62,25 +59,22 @@ async function deploy() {
     await waitUntilFunctionCreateComplete(
       {
         client: functionsClient,
-        maxWaitTime: 120,
+        maxWaitTime: 300,
       },
       {
         functionName: functionName,
       },
     );
   } catch (exception) {
-    console.log("Function already exists, updating instead.");
-
     // TODO: Update once we throw a specific error for function already existing.
-    if (exception.message.includes("simple-function already exists")) {
+    if (exception.message.includes("already exists")) {
+      console.log("Function already exists, updating instead.");
+
       // If CreateFunction failed because the function already exists, we will update the function instead.
       const updateFunctionCommand = new UpdateFunctionCommand({
         functionName: functionName,
         packageBucket: deploymentBucket,
         packageKey: deploymentFileName,
-        logRetention: 1,          // TODO: should be optional but getting error if not specified
-        environmentVariables: {}, // TODO: should be optional but getting error if not specified
-        timeout: 3,               // TODO: should be optional but getting error if not specified
       });
       const updateFunctionResult = await functionsClient.send(updateFunctionCommand);
       console.log("Update function result: ", updateFunctionResult);

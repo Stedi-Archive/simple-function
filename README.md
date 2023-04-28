@@ -51,20 +51,12 @@ Before you deploy the function to your Stedi account, you may want to test it on
 1. Initialize npm.
 
    ```shell
-   npm init -y
+   npm init es6 -y
    ```
+
+   The `es6` parameter tells npm to treat this project as an ECMAScript module, which allows us to reference the Stedi SDK using the ES import statement. Alternatively, we would need to ensure that `package.json` contains the entry `"type": "module"`.
 
    The option `-y` fills `package.json` with default values. If you leave it out, npm will ask you for a couple of values before creating `package.json`, but you can also edit those after `package.json` has been created.
-
-2. Open [package.json](package.json).
-
-3. Add the following line anywhere inside the top-level to let us use ES `import` statements:
-
-   ```plain
-   "type": "module",
-   ```
-
-   This tells Node.js to use ECMAScript Modules.
 
 ### Running the test
 
@@ -110,22 +102,22 @@ The [deployment script](deploy.js) uses the Stedi Functions SDK to deploy the co
 
 ### Installing the Stedi Functions SDK
 
-Since the deployment script uses the Stedi Functions SDK, you’ll have to install it. This example is designed to work with Stedi Functions versions `0.1.x` or later so we'll tell `npm` to download an SDK in that range.
+Since the deployment script uses the Stedi Functions SDK, you’ll have to install it. This example is designed to work with Stedi Functions versions `0.2.x` or later so we'll tell `npm` to download an SDK in that range.
 
 ```shell
-npm install @stedi/sdk-client-functions@^0.1 --save-dev
+npm install @stedi/sdk-client-functions@^0.2 --save-dev
 ```
 The option `--save-dev` lets npm know that the function itself does not use the SDK; we only need it for deployment.
 
 We also need the Buckets SDK in order to publish our code to Stedi. Note that the version of the Buckets SDK we are using is from the `0.0.x` series.
 
 ```shell
-npm install @stedi/sdk-client-buckets@^0.0 --save-dev
+npm install @stedi/sdk-client-buckets@^0.2 --save-dev
 ```
 Finally, we'll also need to install a utility library to help us package the function code into a ZIP file before we upload it.
 
 ```shell
-npm install jszip --save-dev
+npm install jszip@3 --save-dev
 ```
 
 ### API key
@@ -167,7 +159,7 @@ node invoke.js
 Alternatively, you can invoke the function from the command line using the Stedi CLI. First, you’ll have to install the CLI.
 
 ```shell
-npm install @stedi/cli --save-dev
+npm install @stedi/cli@2.x --save-dev
 ```
 
 You can then invoke the function.
