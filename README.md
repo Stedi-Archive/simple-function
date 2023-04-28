@@ -109,7 +109,7 @@ npm install @stedi/sdk-client-functions@^0.2 --save-dev
 ```
 The option `--save-dev` lets npm know that the function itself does not use the SDK; we only need it for deployment.
 
-We also need the Buckets SDK in order to publish our code to Stedi. Note that the version of the Buckets SDK we are using is from the `0.0.x` series.
+We also need the Buckets SDK in order to publish our code to Stedi.
 
 ```shell
 npm install @stedi/sdk-client-buckets@^0.2 --save-dev
