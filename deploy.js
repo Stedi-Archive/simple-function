@@ -2,46 +2,91 @@ import {
   FunctionsClient,
   CreateFunctionCommand,
   UpdateFunctionCommand,
-  ResourceConflictException
+  waitUntilFunctionCreateComplete,
+  waitUntilFunctionUpdateComplete,
 } from "@stedi/sdk-client-functions";
 import { readFile } from "fs/promises";
+import {
+  BucketsClient,
+  PutObjectCommand
+} from "@stedi/sdk-client-buckets";
+import JSZip from "jszip";
 
 async function deploy() {
+  const apiKey = process.env["STEDI_API_KEY"];                       // Read API key from the environment variable we set.
+  const deploymentBucket = process.env["STEDI_DEPLOYMENT_BUCKET"];   // Read bucket name from the environment.
+
+  // The buckets client allows us to upload our function to Stedi.
+  const bucketsClient = new BucketsClient({
+    region: "us",
+    apiKey: apiKey,
+  });
+
+  // The packaged function contents.
+  const zip = new JSZip();
+  zip.file("index.js", await readFile("index.js", "utf8"));
+  const functionZipFile = await zip.generateAsync({ type: "nodebuffer", platform: "UNIX" });
+
+  // What we will name the function package in the bucket.
+  const deploymentFileName = "simple-function.zip";
+  await bucketsClient.send(new PutObjectCommand({
+    bucketName: deploymentBucket,
+    key: deploymentFileName,
+    body: functionZipFile,
+  }));
+
   // The client gives us access to Stedi Functions.
   const functionsClient = new FunctionsClient({
     region: "us",
-    apiKey: process.env.STEDI_API_KEY   // Read API key from environment variable.
+    apiKey: apiKey   // Read API key from environment variable.
   });
 
-  // If the function already exists, we need to update it. If it doesn’t exist, we need to create
-  // it. We’ll try to create it and if that fails, we’ll update it instead.
+  // If the function already exists, we need to update it. If it doesn't exist, we need to create
+  // it. We'll try to create it and if that fails, we'll update it instead.
   const functionName = "simple-function";
-  const code = await readFile("index.js", "utf8"); // Read in the code for the function as a string.
-                                                   // This works because we only have a single file
-                                                   // and no external libraries. (The Stedi
-                                                   // Functions SDK is an external library, but we
-                                                   // don’t need to include it as part of the
-                                                   // function; it’s only used during deployment.)
-                                                   // For deploying libraries and multiple files,
-                                                   // see the tutorial at
-                                                   // https://github.com/Stedi-Demos/deploy-function-using-sdk
 
   try {
     // Try to create the function.
     const createFunctionCommand = new CreateFunctionCommand({
-      "functionName": functionName,
-      "code": code                            
+      functionName: functionName,
+      packageBucket: deploymentBucket,
+      packageKey: deploymentFileName,
     });
-    await functionsClient.send(createFunctionCommand);
-  }
-  catch (exception) {
-    if (exception instanceof ResourceConflictException) {
-      // If CreateFunction failed because the function already exists, update the function instead.
+    const createFunctionResult = await functionsClient.send(createFunctionCommand);
+    console.log("Create function result: ", createFunctionResult);
+
+    // The waiter utility will let us know when the function deployment is done.
+    await waitUntilFunctionCreateComplete(
+      {
+        client: functionsClient,
+        maxWaitTime: 300,
+      },
+      {
+        functionName: functionName,
+      },
+    );
+  } catch (exception) {
+    if (exception.message.includes("already exists")) {
+      console.log("Function already exists, updating instead.");
+
+      // If CreateFunction failed because the function already exists, we will update the function instead.
       const updateFunctionCommand = new UpdateFunctionCommand({
-        "functionName": functionName,
-        "code": code
+        functionName: functionName,
+        packageBucket: deploymentBucket,
+        packageKey: deploymentFileName,
       });
-      await functionsClient.send(updateFunctionCommand);
+      const updateFunctionResult = await functionsClient.send(updateFunctionCommand);
+      console.log("Update function result: ", updateFunctionResult);
+
+      await waitUntilFunctionUpdateComplete(
+        {
+          client: functionsClient,
+          maxWaitTime: 120,
+        },
+        {
+          functionName: functionName,
+        },
+      );
     }
     else {
       // Something else went wrong. Raise the exception again and let someone else handle it.
