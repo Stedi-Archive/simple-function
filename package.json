@@ -4,8 +4,7 @@
   "version": "1.1.0",
   "description": "A basic example of deploying and running code using Stedi Functions",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Stedi-Demos/simple-function.git"

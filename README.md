@@ -48,15 +48,17 @@ Before you deploy the function to your Stedi account, you may want to test it on
 
 `test.js` uses [ECMAScript Modules](https://webpack.js.org/guides/ecma-script-modules/), so you need to let Node.js know about that before you can run the code.
 
-1. Initialize npm.
+1. [Optional] Initialize npm.
 
-   ```shell
-   npm init es6 -y
-   ```
+You do NOT need to initialize npm - we have provided a basic `package.json` file to get you started. This step would be required if you were starting a brand new Stedi Functions project from scratch so we have included it here for completeness.
 
-   The `es6` parameter tells npm to treat this project as an ECMAScript module, which allows us to reference the Stedi SDK using the ES import statement. Alternatively, we would need to ensure that `package.json` contains the entry `"type": "module"`.
+```shell
+npm init es6 -y
+```
 
-   The option `-y` fills `package.json` with default values. If you leave it out, npm will ask you for a couple of values before creating `package.json`, but you can also edit those after `package.json` has been created.
+The `es6` parameter tells npm to treat this project as an ECMAScript module, which allows us to reference the Stedi SDK using the ES import statement. Alternatively, we would need to ensure that `package.json` contains the entry `"type": "module"`.
+
+The option `-y` fills `package.json` with default values. If you leave it out, npm will ask you for a couple of values before creating `package.json`, but you can also edit those after `package.json` has been created.
 
 ### Running the test
 
@@ -78,23 +80,23 @@ If you want to pass a parameter to `handler()`, you’ll have to change the code
 
 1. Change the code that calls the function.
 
-   ```javascript
-   handler({
-     name: "Mrs. Longprattle"
-   });
-   ```
-  
+```javascript
+handler({
+  name: "Mrs. Longprattle"
+});
+```
+
 2. Run the test.
 
-   ```shell
-   node test.js
-   ```
+```shell
+node test.js
+```
 
-   The output should be:
+The output should be:
 
-   ```shell
-   Hello, Mrs. Longprattle!
-   ```
+```shell
+Hello, Mrs. Longprattle!
+```
 
 ## Deployment
 
