@@ -1,3 +1,3 @@
-const { handler } = require("./index.js");
+import { handler } from "./index.js";
 
 handler();
